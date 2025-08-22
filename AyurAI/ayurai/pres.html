@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediFind - Find Your Medicines</title>
+    <style>
+        :root {
+            --primary: #4a6eb5;
+            --secondary: #6bc2c2;
+            --accent: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --discount: #28a745;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e0f7fa, #bbdefb);
+            color: var(--dark);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 0;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .logo-icon {
+            font-size: 2rem;
+            color: var(--accent);
+        }
+        
+        main {
+            padding: 2rem 0;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-title {
+            color: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+        
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        label {
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        input, select {
+            padding: 0.8rem;
+            border: 2px solid var(--secondary);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            cursor: pointer;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .file-input-label {
+            background-color: var(--secondary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            display: inline-block;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        
+        .file-input-wrapper:hover .file-input-label {
+            background-color: var(--primary);
+        }
+        
+        .file-name {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+        
+        button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        
+        button:hover {
+            background-color: #e55252;
+            transform: scale(1.05);
+        }
+        
+        .results-section {
+            display: none;
+        }
+        
+        .spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .medicine-list {
+            margin-top: 1rem;
+        }
+        
+        .medicine-item {
+            background-color: #f0f9ff;
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .medicine-name {
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .pharmacy-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f0f9ff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--secondary);
+            transition: all 0.3s ease;
+        }
+        
+        .pharmacy-card:hover {
+            background-color: #e0f0ff;
+            transform: translateX(5px);
+        }
+        
+        .pharmacy-info {
+            flex: 3;
+        }
+        
+        .pharmacy-name {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .pharmacy-address, .pharmacy-distance {
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+        
+        .availability {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .available {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .partially-available {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .discount-badge {
+            background-color: var(--discount);
+            color: white;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        
+        .discount-details {
+            font-size: 0.85rem;
+            color: var(--discount);
+            margin-top: 3px;
+        }
+        
+        .directions-btn {
+            flex: 1;
+            text-align: right;
+        }
+        
+        .directions-btn button {
+            background-color: var(--primary);
+            font-size: 0.9rem;
+            padding: 8px 16px;
+        }
+        
+        .ai-assistant {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 320px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .ai-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .ai-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .ai-icon {
+            font-size: 1.4rem;
+        }
+        
+        .ai-body {
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .ai-message {
+            background-color: #f0f4f8;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .ai-input {
+            display: flex;
+            padding: 10px 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .ai-input input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+        
+        .ai-input button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        
+        .minimized {
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        
+        .minimized .ai-body, .minimized .ai-input {
+            display: none;
+        }
+        
+        .minimized .ai-header {
+            height: 100%;
+            width: 100%;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .minimized .ai-title span {
+            display: none;
+        }
+        
+        .minimized .minimize-btn {
+            display: none;
+        }
+        
+        .robot-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+        }
+        
+        .robot-face {
+            position: relative;
+            width: 30px;
+            height: 30px;
+        }
+        
+        .robot-head {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 30px;
+            height: 20px;
+            background-color: #555;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .robot-eyes {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 20px;
+            height: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .robot-eye {
+            width: 6px;
+            height: 6px;
+            background-color: #00f2ff;
+            border-radius: 50%;
+            animation: blink 3s infinite;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            49% { opacity: 1; }
+            50% { opacity: 0; }
+            51% { opacity: 1; }
+            100% { opacity: 1; }
+        }
+        
+        .robot-body {
+            position: absolute;
+            top: 20px;
+            left: 2px;
+            width: 26px;
+            height: 10px;
+            background-color: #777;
+            border-radius: 0 0 5px 5px;
+        }
+        
+        .robot-antenna {
+            position: absolute;
+            top: -5px;
+            left: 15px;
+            width: 2px;
+            height: 6px;
+            background-color: #999;
+        }
+        
+        .robot-antenna-top {
+            position: absolute;
+            top: -7px;
+            left: 14px;
+            width: 4px;
+            height: 2px;
+            background-color: red;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .pharmacy-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .availability, .directions-btn {
+                margin-top: 10px;
+                text-align: left;
+            }
+            
+            .ai-assistant {
+                width: 90%;
+                right: 5%;
+                bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">💊</span>
+                    <span>MediFind</span>
+                </div>
+                <p>Find nearby pharmacies with your prescribed medications and discounts</p>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="card">
+            <h2 class="card-title">Upload Your Prescription</h2>
+            <div class="upload-section">
+                <div class="input-group">
+                    <label for="prescription">Upload Prescription Image</label>
+                    <div class="file-input-wrapper">
+                        <span class="file-input-label">Choose File</span>
+                        <input type="file" id="prescription" accept="image/*">
+                    </div>
+                    <div class="file-name" id="file-name">No file chosen</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="location">Your Location</label>
+                    <input type="text" id="location" placeholder="Enter your address or use current location">
+                    <button id="current-location" style="margin-top: 10px;">Use Current Location</button>
+                </div>
+                
+                <button id="search-btn" style="margin-top: 20px;">Find Medicines</button>
+            </div>
+        </div>
+        
+        <div class="spinner" id="spinner"></div>
+        
+        <div class="results-section" id="results">
+            <div class="card">
+                <h2 class="card-title">Prescribed Medicines</h2>
+                <div class="medicine-list" id="medicine-list">
+                    <!-- Medicines will be listed here -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">Nearby Pharmacies</h2>
+                <div id="pharmacies-list">
+                    <!-- Pharmacies will be listed here -->
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div class="ai-assistant" id="ai-assistant">
+        <div class="ai-header" id="ai-header">
+            <div class="ai-title">
+                <div class="robot-avatar">
+                    <div class="robot-face">
+                        <div class="robot-antenna"></div>
+                        <div class="robot-antenna-top"></div>
+                        <div class="robot-head"></div>
+                        <div class="robot-eyes">
+                            <div class="robot-eye"></div>
+                            <div class="robot-eye"></div>
+                        </div>
+                        <div class="robot-body"></div>
+                    </div>
+                </div>
+                <span>MediBot Assistant</span>
+            </div>
+            <button class="minimize-btn" id="minimize-btn">—</button>
+        </div>
+        <div class="ai-body" id="ai-messages">
+            <div class="ai-message">
+                Hello! I'm MediBot, your pharmacy assistant. Upload a prescription and I'll help you find nearby pharmacies with your medications and available discounts. How can I help you today?
+            </div>
+        </div>
+        <div class="ai-input">
+            <input type="text" id="ai-input" placeholder="Ask something...">
+            <button id="ai-send">Send</button>
+        </div>
+    </div>
+    
+    <script>
+        const sampleMedicines = [
+            "Amoxicillin 500mg",
+            "Lisinopril 10mg",
+            "Atorvastatin 20mg"
+        ];
+        
+        const samplePharmacies = [
+            {
+                name: "HealthPlus Pharmacy",
+                address: "123 Main Street, Cityville",
+                distance: "0.8 km",
+                availability: "all",
+                discount: true,
+                discountDetails: "15% off on all generic medications",
+                discountAmount: "15%",
+                lat: 40.7128,
+                lng: -74.0060
+            },
+            {
+                name: "MediCare Drugstore",
+                address: "456 Oak Avenue, Townsburg",
+                distance: "1.2 km",
+                availability: "partial",
+                discount: true,
+                discountDetails: "10% off for first-time customers",
+                discountAmount: "10%",
+                lat: 40.7135,
+                lng: -74.0085
+            },
+            {
+                name: "QuickMeds Pharmacy",
+                address: "789 Pine Road, Villageton",
+                distance: "1.5 miles",
+                availability: "all",
+                discount: false,
+                lat: 40.7110,
+                lng: -74.0030
+            },
+            {
+                name: "Family Pharmacy",
+                address: "321 Maple Lane, Villageton",
+                distance: "1.8 miles",
+                availability: "partial",
+                discount: true,
+                discountDetails: "20% senior discount available",
+                discountAmount: "20%",
+                lat: 40.7150,
+                lng: -74.0070
+            }
+        ];
+        
+        document.getElementById('prescription').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
+            document.getElementById('file-name').textContent = fileName;
+        });
+        
+        document.getElementById('current-location').addEventListener('click', function() {
+            document.getElementById('location').value = "Fetching location...";
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    document.getElementById('location').value = `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`;
+                    
+                    addAIMessage("I've detected your current location. Upload your prescription to find nearby pharmacies with discounts on your medications.");
+                }, function() {
+                    document.getElementById('location').value = "";
+                    alert("Could not fetch your location. Please enter it manually.");
+                });
+            } else {
+                document.getElementById('location').value = "";
+                alert("Geolocation is not supported by your browser. Please enter your location manually.");
+            }
+        });
+        
+        document.getElementById('search-btn').addEventListener('click', function() {
+            const prescription = document.getElementById('prescription').files[0];
+            const location = document.getElementById('location').value;
+            
+            if (!prescription) {
+                alert("Please upload a prescription image.");
+                return;
+            }
+            
+            if (!location) {
+                alert("Please enter your location or use current location.");
+                return;
+            }
+            
+            document.getElementById('spinner').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            setTimeout(function() {
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+                
+                const medicineList = document.getElementById('medicine-list');
+                medicineList.innerHTML = '';
+                
+                sampleMedicines.forEach(medicine => {
+                    const div = document.createElement('div');
+                    div.className = 'medicine-item';
+                    div.innerHTML = `<span class="medicine-name">${medicine}</span>`;
+                    medicineList.appendChild(div);
+                });
+           
+                const pharmaciesList = document.getElementById('pharmacies-list');
+                pharmaciesList.innerHTML = '';
+                
+                samplePharmacies.forEach(pharmacy => {
+                    const div = document.createElement('div');
+                    div.className = 'pharmacy-card';
+                    
+                    let discountHTML = '';
+                    if (pharmacy.discount) {
+                        discountHTML = `
+                            <div class="discount-badge">${pharmacy.discountAmount} Discount</div>
+                            <div class="discount-details">${pharmacy.discountDetails}</div>
+                        `;
+                    }
+                    
+                    div.innerHTML = `
+                        <div class="pharmacy-info">
+                            <div class="pharmacy-name">${pharmacy.name}</div>
+                            <div class="pharmacy-address">${pharmacy.address}</div>
+                            <div class="pharmacy-distance">${pharmacy.distance}</div>
+                            ${discountHTML}
+                        </div>
+                        <div class="availability">
+                            <span class="${pharmacy.availability === 'all' ? 'available' : 'partially-available'}">
+                                ${pharmacy.availability === 'all' ? 'All Available' : 'Partially Available'}
+                            </span>
+                        </div>
+                        <div class="directions-btn">
+                            <button onclick="openDirections(${pharmacy.lat}, ${pharmacy.lng})">Directions</button>
+                        </div>
+                    `;
+                    
+                    pharmaciesList.appendChild(div);
+                });
+                
+                addAIMessage("I've found 4 pharmacies near you that have your medications. HealthPlus Pharmacy has all your medicines in stock and offers a 15% discount on generic medications. They're only 0.8 miles away!");
+            }, 2000);
+        });
+        
+        const aiAssistant = document.getElementById('ai-assistant');
+        const aiHeader = document.getElementById('ai-header');
+        const minimizeBtn = document.getElementById('minimize-btn');
+        const aiMessages = document.getElementById('ai-messages');
+        const aiInput = document.getElementById('ai-input');
+        const aiSend = document.getElementById('ai-send');
+        
+
+        aiHeader.addEventListener('click', function(e) {
+            if (e.target !== minimizeBtn) {
+                aiAssistant.classList.toggle('minimized');
+                if (aiAssistant.classList.contains('minimized')) {
+                    minimizeBtn.textContent = '+';
+                } else {
+                    minimizeBtn.textContent = '—';
+                    aiInput.focus();
+                }
+            }
+        });
+        
+        minimizeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            aiAssistant.classList.toggle('minimized');
+            if (aiAssistant.classList.contains('minimized')) {
+                minimizeBtn.textContent = '+';
+            } else {
+                minimizeBtn.textContent = '—';
+                aiInput.focus();
+            }
+        });
+        
+        // Send message
+        function sendAIMessage() {
+            const message = aiInput.value.trim();
+            if (message) {
+                addUserMessage(message);
+                aiInput.value = '';
+                
+                // Process the message and respond
+                setTimeout(() => {
+                    processUserMessage(message);
+                }, 500);
+            }
+        }
+        
+        aiSend.addEventListener('click', sendAIMessage);
+        
+        aiInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendAIMessage();
+            }
+        });
+        
+        function addUserMessage(message) {
+            const div = document.createElement('div');
+            div.className = 'ai-message';
+            div.style.backgroundColor = '#e0f0ff';
+            div.style.marginLeft = '40px';
+            div.textContent = message;
+            aiMessages.appendChild(div);
+            aiMessages.scrollTop = aiMessages.scrollHeight;
+        }
+        
+        function addAIMessage(message) {
+            const div = document.createElement('div');
+            div.className = 'ai-message';
+            div.textContent = message;
+            aiMessages.appendChild(div);
+            aiMessages.scrollTop = aiMessages.scrollHeight;
+            
+            // If assistant is minimized, maximize it to show the message
+            if (aiAssistant.classList.contains('minimized')) {
+                aiAssistant.classList.remove('minimized');
+                minimizeBtn.textContent = '—';
+            }
+        }
+        
+        function processUserMessage(message) {
+            message = message.toLowerCase();
+            
+            if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
+                addAIMessage("Hi there! How can I help you with finding your medications today?");
+            }
+            else if (message.includes('help') || message.includes('how') || message.includes('work')) {
+                addAIMessage("To use MediFind, upload a photo of your prescription and enter your location. I'll analyze the prescription and find nearby pharmacies that have your medications in stock, along with any available discounts!");
+            }
+            else if (message.includes('prescription') || message.includes('upload')) {
+                addAIMessage("You can upload your prescription by clicking the 'Choose File' button at the top of the page. I can read most handwritten and printed prescriptions.");
+            }
+            else if (message.includes('location')) {
+                addAIMessage("You can either type in your address or use the 'Use Current Location' button to automatically detect where you are. This helps us find the closest pharmacies to you.");
+            }
+            else if (message.includes('medicine') || message.includes('medication') || message.includes('drug')) {
+                addAIMessage("I can help you find most common prescription medications. Once you upload your prescription, I'll identify the medicines and check availability at nearby pharmacies.");
+            }
+            else if (message.includes('pharmacy') || message.includes('pharmacies') || message.includes('store')) {
+                addAIMessage("I can show you nearby pharmacies that have your medications in stock. I'll display their location, distance from you, available discounts, and whether they have all or some of your prescribed medicines.");
+            }
+            else if (message.includes('discount') || message.includes('offer') || message.includes('coupon') || message.includes('save')) {
+                addAIMessage("Many pharmacies offer discounts on medications. I'll show you available discounts at each pharmacy, including generic medicine discounts, first-time customer offers, and special discounts for seniors and insurance holders.");
+            }
+            else if (message.includes('direction') || message.includes('map') || message.includes('navigate')) {
+                addAIMessage("Once I find pharmacies for you, you can click the 'Directions' button to open Google Maps navigation to that pharmacy.");
+            }
+            else if (message.includes('thank')) {
+                addAIMessage("You're welcome! I'm happy to help you find your medications and save money. Is there anything else you need assistance with?");
+            }
+            else {
+                addAIMessage("I'm here to help you find pharmacies with your prescribed medications and available discounts. Try uploading your prescription and entering your location, or ask me how to use this service!");
+            }
+        }
+        
+        // Function to open Google Maps directions
+        function openDirections(lat, lng) {
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>

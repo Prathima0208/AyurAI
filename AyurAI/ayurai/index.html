@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIHerb</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #558b2f;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.2rem;
+        }
+        
+        h2 {
+            color: #558b2f;
+            border-bottom: 2px solid #558b2f;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        
+        .intro {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .form-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        select, input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        
+        .symptom-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .symptom-item {
+            width: 33%;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            background-color: #558b2f;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #33691e;
+        }
+        
+        #recommendations {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .recommendation-section {
+            margin-bottom: 20px;
+        }
+        
+        .recommendation-section h3 {
+            color: #558b2f;
+            margin-bottom: 10px;
+        }
+        
+        .recommendation-section ul {
+            padding-left: 20px;
+        }
+        
+        .recommendation-section ul li {
+            margin-bottom: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .dosha-description {
+            margin-top: 10px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AIHerb</h1>
+        </header>
+        
+        <div class="intro">
+            <h2>Welcome to Ayurvedic Health Guidance</h2>
+            <p>Ayurveda is an ancient Indian system of medicine that focuses on balancing the three doshas (Vata, Pitta, and Kapha) to maintain health and prevent illness. This application provides personalized Ayurvedic recommendations for common ailments based on your symptoms and body constitution.</p>
+        </div>
+        
+        <div class="form-container">
+            <h2>Your Health Profile</h2>
+            
+            <div class="form-group">
+                <label for="dosha">Select your predominant body type (Prakriti):</label>
+                <select id="dosha">
+                    <option value="">-- Select your Dosha --</option>
+                    <option value="vata">Vata (Air & Space)</option>
+                    <option value="pitta">Pitta (Fire & Water)</option>
+                    <option value="kapha">Kapha (Earth & Water)</option>
+                </select>
+                <div class="dosha-description" id="dosha-description"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="condition">Select your primary health concern:</label>
+                <select id="condition">
+                    <option value="">-- Select condition --</option>
+                    <option value="cold">Common Cold</option>
+                    <option value="cough">Cough</option>
+                    <option value="headache">Headache</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Select your symptoms:</label>
+                <div class="symptom-checkboxes" id="symptoms-container">
+                    <!-- Symptoms will be populated based on selected condition -->
+                </div>
+            </div>
+            
+            <button id="submit-btn">Get Ayurvedic Recommendations</button>
+        </div>
+        
+        <div id="recommendations">
+            <h2>Your Personalized Ayurvedic Recommendations</h2>
+            
+            <div class="recommendation-section">
+                <h3>Herbal Remedies</h3>
+                <ul id="herbal-remedies"></ul>
+            </div>
+            
+            <div class="recommendation-section">
+                <h3>Dietary Recommendations</h3>
+                <ul id="diet-recommendations"></ul>
+            </div>
+            
+            <div class="recommendation-section">
+                <h3>Lifestyle Practices</h3>
+                <ul id="lifestyle-recommendations"></ul>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Note: These recommendations are general guidelines based on Ayurvedic principles. For serious or persistent health issues, please consult with a qualified Ayurvedic practitioner or healthcare provider.</p>
+        </footer>
+    </div>
+
+    <script>
+        const symptomsByCondition = {
+            "cold": [
+                "Runny nose", 
+                "Nasal congestion", 
+                "Sneezing", 
+                "Sore throat", 
+                "Mild fever", 
+                "Body aches"
+            ],
+            "cough": [
+                "Dry cough", 
+                "Wet cough with phlegm", 
+                "Chest congestion", 
+                "Sore throat", 
+                "Wheezing", 
+                "Difficulty breathing"
+            ],
+            "headache": [
+                "Throbbing pain", 
+                "Pressure around temples", 
+                "Sensitivity to light", 
+                "Nausea", 
+                "Pain on one side", 
+                "Tension in neck"
+            ]
+        };
+        const recommendations = {
+            "cold": {
+                "vata": {
+                    "herbal": [
+                        "Tulsi (Holy Basil) tea with honey and ginger",
+                        "Cinnamon, cardamom, and ginger infusion",
+                        "Sitopaladi powder with honey"
+                    ],
+                    "diet": [
+                        "Warm vegetable soup with garlic and black pepper",
+                        "Avoid cold foods and beverages",
+                        "Include warming spices like cinnamon, cloves, and ginger in meals",
+                        "Stay hydrated with warm water"
+                    ],
+                    "lifestyle": [
+                        "Keep your head and ears covered in cold weather",
+                        "Practice steam inhalation with eucalyptus oil",
+                        "Get adequate rest and sleep",
+                        "Apply sesame oil in nostrils before going out"
+                    ]
+                },
+                "pitta": {
+                    "herbal": [
+                        "Coriander and fennel seed tea",
+                        "Guduchi (Tinospora cordifolia) with honey",
+                        "Sudarshan churna in small doses"
+                    ],
+                    "diet": [
+                        "Light and easily digestible foods like khichdi",
+                        "Coconut water and fresh fruit juices",
+                        "Avoid hot, spicy, and fermented foods",
+                        "Add cooling herbs like mint and coriander to diet"
+                    ],
+                    "lifestyle": [
+                        "Moderate exercise like walking",
+                        "Nasya therapy with cooling oils",
+                        "Avoid exposure to direct sun and heat",
+                        "Practice cooling pranayama techniques"
+                    ]
+                },
+                "kapha": {
+                    "herbal": [
+                        "Dry ginger and black pepper tea",
+                        "Trikatu (three spices) with honey",
+                        "Pippali (long pepper) with honey"
+                    ],
+                    "diet": [
+                        "Light and warm meals with minimal oil",
+                        "Avoid dairy, sugar, and cold foods",
+                        "Add pungent spices like ginger, black pepper, and cloves to food",
+                        "Drink hot water with lemon and honey throughout the day"
+                    ],
+                    "lifestyle": [
+                        "Vigorous exercise to increase circulation",
+                        "Regular dry brushing of the skin",
+                        "Steam inhalation with eucalyptus or camphor",
+                        "Practice kapalabhati pranayama (skull-shining breath)"
+                    ]
+                }
+            },
+            "cough": {
+                "vata": {
+                    "herbal": [
+                        "Licorice and ginger tea with honey",
+                        "Vasa (Adhatoda vasica) leaf decoction",
+                        "Talisadi churna with honey"
+                    ],
+                    "diet": [
+                        "Warm milk with turmeric and ghee before bed",
+                        "Soups with garlic, onion, and black pepper",
+                        "Avoid cold, dry, and raw foods",
+                        "Stay hydrated with warm herbal teas"
+                    ],
+                    "lifestyle": [
+                        "Steam inhalation with eucalyptus oil",
+                        "Apply warm sesame oil on chest and back",
+                        "Practice gentle yoga focusing on chest expansion",
+                        "Maintain warm and humid environment"
+                    ]
+                },
+                "pitta": {
+                    "herbal": [
+                        "Sitopaladi churna with honey",
+                        "Licorice and coriander seed tea",
+                        "Chyawanprash in small amounts"
+                    ],
+                    "diet": [
+                        "Pear or grape juice with a pinch of cardamom",
+                        "Cooling foods like cucumber, watermelon, and pomegranate",
+                        "Avoid hot, spicy, and sour foods",
+                        "Drink room temperature water with honey"
+                    ],
+                    "lifestyle": [
+                        "Gentle pranayama like Sheetali (cooling breath)",
+                        "Apply cooling oils like coconut or aloe vera on chest",
+                        "Avoid hot and humid environments",
+                        "Practice meditation to reduce stress"
+                    ]
+                },
+                "kapha": {
+                    "herbal": [
+                        "Trikatu (three spices) with honey",
+                        "Pippali (long pepper) and ginger tea",
+                        "Kantakari (Solanum xanthocarpum) decoction"
+                    ],
+                    "diet": [
+                        "Honey with black pepper and ginger juice",
+                        "Clear soups with plenty of spices",
+                        "Avoid dairy, sugar, and cold foods",
+                        "Include pungent and bitter vegetables in diet"
+                    ],
+                    "lifestyle": [
+                        "Dry heat application on chest",
+                        "Vigorous exercise to loosen phlegm",
+                        "Sleep with head elevated",
+                        "Regular practice of kapalabhati and bhastrika pranayama"
+                    ]
+                }
+            },
+            "headache": {
+                "vata": {
+                    "herbal": [
+                        "Brahmi (Bacopa monnieri) tea",
+                        "Ashwagandha with warm milk before bed",
+                        "Jatamansi (Nardostachys jatamansi) powder with ghee"
+                    ],
+                    "diet": [
+                        "Warm, nourishing foods like soups and stews",
+                        "Include healthy fats like ghee and sesame oil",
+                        "Avoid caffeine, alcohol, and processed foods",
+                        "Maintain regular meal times"
+                    ],
+                    "lifestyle": [
+                        "Apply warm sesame oil on forehead and temples",
+                        "Regular sleep schedule and adequate rest",
+                        "Shirodhara therapy (oil pouring on forehead)",
+                        "Practice gentle yoga and meditation"
+                    ]
+                },
+                "pitta": {
+                    "herbal": [
+                        "Shatavari (Asparagus racemosus) with aloe vera juice",
+                        "Brahmi and Gotukola tea",
+                        "Amalaki (Indian gooseberry) juice with honey"
+                    ],
+                    "diet": [
+                        "Cooling foods like cucumber, watermelon, and coconut water",
+                        "Avoid hot, spicy, and fermented foods",
+                        "Fresh fruits and vegetables",
+                        "Reduce salt intake"
+                    ],
+                    "lifestyle": [
+                        "Apply sandalwood paste or aloe vera gel on forehead",
+                        "Avoid exposure to direct sunlight",
+                        "Practice cooling pranayama like Sheetali",
+                        "Moonlight walking meditation"
+                    ]
+                },
+                "kapha": {
+                    "herbal": [
+                        "Ginger and cinnamon tea",
+                        "Tulsi (Holy Basil) and black pepper infusion",
+                        "Trikatu (three spices) with honey"
+                    ],
+                    "diet": [
+                        "Light and dry foods with minimal oil",
+                        "Include pungent spices in meals",
+                        "Avoid dairy, sugar, and cold foods",
+                        "Drink warm water with lemon throughout the day"
+                    ],
+                    "lifestyle": [
+                        "Regular exercise, especially in the morning",
+                        "Nasya therapy with warming oils",
+                        "Apply mustard oil or ginger paste on forehead",
+                        "Practice stimulating pranayama like Bhastrika"
+                    ]
+                }
+            }
+        };
+
+        const doshaDescriptions = {
+            "vata": "Vata types are typically thin with dry skin and hair. They are creative, energetic, and quick-thinking but may experience anxiety, insomnia, and irregular digestion when imbalanced.",
+            "pitta": "Pitta types have a medium build with warm skin and sharp features. They are intelligent, focused, and ambitious but may experience irritability, inflammation, and digestive issues when imbalanced.",
+            "kapha": "Kapha types have a sturdy build with smooth, cool skin. They are calm, compassionate, and stable but may experience lethargy, weight gain, and congestion when imbalanced."
+        };
+
+        const conditionSelect = document.getElementById('condition');
+        const symptomsContainer = document.getElementById('symptoms-container');
+        const doshaSelect = document.getElementById('dosha');
+        const doshaDescription = document.getElementById('dosha-description');
+        const submitBtn = document.getElementById('submit-btn');
+        const recommendationsDiv = document.getElementById('recommendations');
+        const herbalList = document.getElementById('herbal-remedies');
+        const dietList = document.getElementById('diet-recommendations');
+        const lifestyleList = document.getElementById('lifestyle-recommendations');
+
+        conditionSelect.addEventListener('change', function() {
+
+            symptomsContainer.innerHTML = '';
+            
+            const selectedCondition = this.value;
+            if (!selectedCondition) return;
+            
+            symptomsByCondition[selectedCondition].forEach(symptom => {
+                const symptomDiv = document.createElement('div');
+                symptomDiv.className = 'symptom-item';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = 'symptom-' + symptom.toLowerCase().replace(/\s/g, '-');
+                checkbox.name = 'symptoms';
+                checkbox.value = symptom;
+                
+                const label = document.createElement('label');
+                label.htmlFor = checkbox.id;
+                label.textContent = symptom;
+                
+                symptomDiv.appendChild(checkbox);
+                symptomDiv.appendChild(label);
+                symptomsContainer.appendChild(symptomDiv);
+            });
+        });
+
+        doshaSelect.addEventListener('change', function() {
+            const selectedDosha = this.value;
+            if (selectedDosha) {
+                doshaDescription.textContent = doshaDescriptions[selectedDosha];
+            } else {
+                doshaDescription.textContent = '';
+            }
+        });
+
+        submitBtn.addEventListener('click', function() {
+            const selectedDosha = doshaSelect.value;
+            const selectedCondition = conditionSelect.value;
+            
+            if (!selectedDosha || !selectedCondition) {
+                alert('Please select both your body type and health concern.');
+                return;
+            }
+            
+            const selectedSymptoms = Array.from(document.querySelectorAll('input[name="symptoms"]:checked'))
+                .map(checkbox => checkbox.value);
+                
+            if (selectedSymptoms.length === 0) {
+                alert('Please select at least one symptom.');
+                return;
+            }
+            
+            const recommendation = recommendations[selectedCondition][selectedDosha];
+            
+            herbalList.innerHTML = '';
+            dietList.innerHTML = '';
+            lifestyleList.innerHTML = '';
+            
+            recommendation.herbal.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                herbalList.appendChild(li);
+            });
+            
+            recommendation.diet.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                dietList.appendChild(li);
+            });
+            
+            recommendation.lifestyle.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                lifestyleList.appendChild(li);
+            });
+            
+            recommendationsDiv.style.display = 'block';
+            
+            recommendationsDiv.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
